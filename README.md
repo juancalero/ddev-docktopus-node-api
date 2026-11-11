@@ -20,6 +20,7 @@ The first `ddev start` runs `npm install` inside the container (skipped if `node
 | | URL |
 | --- | --- |
 | Host | `http://<project>.ddev.site:13000` — also `ddev api` |
+| Host (HTTPS) | `https://<project>.ddev.site:13001` |
 | From other containers | `http://node:3000` |
 | From Drupal (web container) | `http://node:3000` (also in the `NODE_API` env var) |
 
@@ -29,7 +30,7 @@ Develop by editing `api/` in the project as usual — nodemon reloads on save.
 
 ## Configuration
 
-Connection to PostgreSQL is injected from `.ddev/.env.ddev-docktopus-postgres` (the postgres add-on's file): `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`. Change the router port with `NODE_API_HTTP_PORT` (default `13000`) in `.ddev/.env.ddev-docktopus-node-api` (create it if needed).
+Connection to PostgreSQL is injected from `.ddev/.env.ddev-docktopus-postgres` (the postgres add-on's file): `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`. Router ports are set in `.ddev/.env.ddev-docktopus-node-api`: `NODE_API_HTTP_PORT` (default `13000`) and `NODE_API_HTTPS_PORT` (default `13001`).
 
 ## Uninstallation
 

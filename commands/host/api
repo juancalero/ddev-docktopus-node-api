@@ -5,4 +5,8 @@
 ## Usage: api
 ## Example: "ddev api"
 
-ddev launch :13000
+if [ ${DDEV_PRIMARY_URL%://*} = "http" ]; then
+    ddev launch :13000
+else
+    ddev launch :13001
+fi

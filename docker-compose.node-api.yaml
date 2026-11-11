@@ -3,7 +3,8 @@
 #
 # Serves the code in the project's api/ directory (scaffolded on install if
 # missing). Exposed through the ddev-router at:
-#   http://<project>.ddev.site:13000   (configurable via NODE_API_HTTP_PORT)
+#   http://<project>.ddev.site:13000   https://<project>.ddev.site:13001
+#   (configurable in .ddev/.env.ddev-docktopus-node-api)
 #   Try it: curl http://<project>.ddev.site:13000/hello
 # From other containers: http://node:3000
 
@@ -24,6 +25,7 @@ services:
       - DB_NAME=${POSTGRES_DB:-nodeapi}
       - VIRTUAL_HOST=${DDEV_HOSTNAME}
       - HTTP_EXPOSE=${NODE_API_HTTP_PORT:-13000}:3000
+      - HTTPS_EXPOSE=${NODE_API_HTTPS_PORT:-13001}:3000
     expose:
       - 3000
     networks:
