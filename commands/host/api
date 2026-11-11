@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+## #ddev-generated: If you want to edit and own this file, remove this line.
+## Description: Launch a browser with the Node API
+## Usage: api
+## Example: "ddev api"
+
+ddev launch :13000

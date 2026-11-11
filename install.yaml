@@ -1,0 +1,108 @@
+name: ddev-docktopus-node-api
+
+ddev_version_constraint: '>= v1.24.10'
+
+project_files:
+  - docker-compose.node-api.yaml
+  - commands/host/api
+
+post_install_actions:
+  - |
+    #ddev-description:Make the host command executable
+    chmod +x commands/host/api 2>/dev/null || true
+  - |
+    #ddev-description:Scaffold the api/ directory if the project has none
+    if [ ! -f ../api/package.json ]; then
+      mkdir -p ../api
+      cat > ../api/package.json <<'EOF'
+    {
+      "#ddev-generated": true,
+      "name": "api",
+      "version": "1.0.0",
+      "description": "Node API for the docktopus DDEV workspace",
+      "main": "index.js",
+      "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node index.js",
+        "dev": "nodemon index.js"
+      },
+      "license": "GPL-2.0-or-later",
+      "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^16.5.0",
+        "express": "^5.2.1",
+        "pg": "^8.22.0"
+      },
+      "devDependencies": {
+        "nodemon": "^3.1.10"
+      }
+    }
+    EOF
+      cat > ../api/index.js <<'EOF'
+    // api/index.js
+    // #ddev-generated: If you want to edit and own this file, remove this line.
+    const express = require('express');
+    const cors = require('cors');
+
+    const pool = require('./db');
+
+    const app = express();
+    const PORT = 3000;
+
+    app.use(cors());
+    app.use(express.json());
+
+    // Health check
+    app.get('/hello', (req, res) => {
+      res.json({ message: '¡Hola desde tu API Node en DDEV!' });
+    });
+
+    app.get('/api/users', async (req, res) => {
+      try {
+        const result = await pool.query('SELECT * FROM "user"');
+        res.json(result.rows);
+      } catch (err) {
+        console.error('DB error:', err);
+        res.status(500).json({ error: 'Database error' });
+      }
+    });
+
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Servidor en http://0.0.0.0:${PORT}`);
+    });
+    EOF
+      cat > ../api/db.js <<'EOF'
+    // api/db.js
+    // #ddev-generated: If you want to edit and own this file, remove this line.
+    // Credentials come from the container environment (see
+    // .ddev/.env.ddev-docktopus-postgres for the defaults).
+    require('dotenv').config();
+    const { Pool } = require('pg');
+
+    const pool = new Pool({
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
+    });
+
+    module.exports = pool;
+    EOF
+      cat > ../api/.gitignore <<'EOF'
+    # #ddev-generated: If you want to edit and own this file, remove this line.
+    node_modules/
+    .env
+    EOF
+      echo "ddev-docktopus-node-api: created api/ scaffold (Express 5 + pg)."
+    else
+      echo "ddev-docktopus-node-api: existing api/ directory left untouched."
+    fi
+
+removal_actions:
+  - |
+    #ddev-description:Remove the generated api/ scaffold if unmodified
+    if [ -f ../api/package.json ] && grep -q '#ddev-generated' ../api/package.json; then
+      rm -f ../api/package.json ../api/index.js ../api/db.js ../api/.gitignore
+      rmdir ../api 2>/dev/null || true
+    fi

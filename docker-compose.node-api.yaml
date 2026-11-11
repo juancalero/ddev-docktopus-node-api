@@ -1,0 +1,37 @@
+# Node 22 + Express API service for DDEV (from the docktopus stack).
+#ddev-generated
+#
+# Serves the code in the project's api/ directory (scaffolded on install if
+# missing). Exposed through the ddev-router at:
+#   http://<project>.ddev.site:13000   (configurable via NODE_API_HTTP_PORT)
+#   Try it: curl http://<project>.ddev.site:13000/hello
+# From other containers: http://node:3000
+
+services:
+  node:
+    container_name: ddev-${DDEV_SITENAME}-node
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ../api:/app
+    command: bash -c "if [ ! -d node_modules ]; then npm install --no-audit --no-fund; fi && npm run dev"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${POSTGRES_USER:-nodeuser}
+      - DB_PASS=${POSTGRES_PASSWORD:-nodepass}
+      - DB_NAME=${POSTGRES_DB:-nodeapi}
+      - VIRTUAL_HOST=${DDEV_HOSTNAME}
+      - HTTP_EXPOSE=${NODE_API_HTTP_PORT:-13000}:3000
+    expose:
+      - 3000
+    networks:
+      - ddev_default
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: $DDEV_APPROOT
+  # Tell the web container where the API lives (Drupal code can call it).
+  web:
+    environment:
+      - NODE_API=http://node:3000
